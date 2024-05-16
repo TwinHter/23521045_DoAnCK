@@ -1,4 +1,3 @@
-import hashlib
 import argparse
 import itertools
 from multiprocessing import Pool
