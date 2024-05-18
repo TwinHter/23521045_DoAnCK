@@ -3,7 +3,22 @@ import string
 import time
 from zipfile import ZipFile
 import json
+from flask import Flask, redirect, url_for, render_template, request
 
+app = Flask(__name__)
+@app.route('/', methods = ["GET"])
+def hello_world():
+    return render_template('main.html')
+
+Zzip = "example.zip"
+@app.route('/', methods = ["POST"])
+def get_file():
+    global Zzip
+    if request.method == "POST":
+        Zzip = request.form['fileInput']
+    return render_template('main.html')
+
+    
 data = {}
 def get_data(state, title, content, timee):
     # Trả về dữ liệu JSON
@@ -23,7 +38,6 @@ def get_data(state, title, content, timee):
 
 def start_cracking():
     global data
-    str_zipFile = 'example.zip'
     chars = string.digits  # Sử dụng tất cả các số từ 0 đến 9
     max_length = 6
     start_time = time.time()
@@ -38,7 +52,7 @@ def start_cracking():
             str_pwd = "".join(combination)
 
             try:
-                with ZipFile(str_zipFile) as zipObj:
+                with ZipFile(Zzip) as zipObj:
                     zipObj.extractall(pwd=bytes(str_pwd, 'utf-8'))
                     end_time = time.time()
                     time_taken = int((end_time - start_time) * 1000)
@@ -53,3 +67,8 @@ def start_cracking():
 start_cracking()
 with open('data.json', 'w') as json_file:
     json.dump(data, json_file)
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
