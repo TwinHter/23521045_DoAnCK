@@ -1,74 +1,59 @@
+import argparse
 import itertools
-import string
-import time
+from multiprocessing import Pool
 from zipfile import ZipFile
-import json
-from flask import Flask, redirect, url_for, render_template, request
+import math
 
-app = Flask(__name__)
-@app.route('/', methods = ["GET"])
-def hello_world():
-    return render_template('main.html')
+tested_file = open('tested_password.txt', 'w') # File chứa các password đã thử nghiệm và kết quả đưa ra
+hybrid_file = 'hybrid.txt' # Bộ dữ liệu cho hybrid attack
+dict = {'a': '4', 'o': '0', 'e': '3', 'g': '9', 'z': '2', 'i': '1', 'A': '4', 'O': '0', 'E': '3', 'Z': '2', 'I': '1'}
+def generate_hybrid_passwords(myList, cur = 0):
+        res = []
+        if cur == len(myList):
+            myPassword = ''.join(myList)
+            # print(myList)
+            res.append(myPassword)
+            return res
 
-Zzip = "example.zip"
-@app.route('/', methods = ["POST"])
-def get_file():
-    global Zzip
-    if request.method == "POST":
-        Zzip = request.form['fileInput']
-    return render_template('main.html')
+        res.extend(generate_hybrid_passwords(myList, cur+1))
+        if myList[cur] in dict:
+            tmp = myList[cur]
+            myList[cur] = dict[tmp]
+            res.extend(generate_hybrid_passwords(myList, cur+1))
+            myList[cur] = tmp
 
-    
-data = {}
-def get_data(state, title, content, timee):
-    # Trả về dữ liệu JSON
-    if state:
-        data_to_share = {
-            'title': title,
-            'content': content,
-            'timee': timee
-        }
-    else:
-        data_to_share = {
-            'title': 'Failed to Cracking',
-            'content': '',
-            'timee': ''
-        }
-    return data_to_share
+            if myList[cur] == 'a':
+                myList[cur] = '@'
+                res.extend(generate_hybrid_passwords(myList, cur+1))
+                myList[cur] = 'a'
 
-def start_cracking():
-    global data
-    chars = string.digits  # Sử dụng tất cả các số từ 0 đến 9
-    max_length = 6
-    start_time = time.time()
+        return res
+def crack_passwords_with_hybrid_attack():
+        # a, 4, @ / o, 0 / e, 3/ g, 9/ z 2/ i 1/ Một vài cặp ký tự có thể thay đổi cho nhau
+        # pass-num, num-pass Một vài dạng password có thể được cải tiến (num có length 0->3) 
+        nums = [] # List để chứa các tổ hợp của num
+        for num_length in range(2):
+            Lim = int(math.pow(10, num_length+1))
+            for i in range(Lim):
+                s = str(i).zfill(num_length)
+                nums.append(s)
+        
+        nums3 = ['000', '123', '321', '111', '222', '333', '444', '555', '666', '777', '888', '999', '987', '789', '1234', '123456', 'abc', 'xyz']
+        nums.extend(nums3)
+        
+        myValidPassword = []
+        with open(hybrid_file, 'r', encoding="latin-1") as dictionary:
+            passwords = dictionary.read().splitlines() # List để chứa các tổ hợp của pass
+            for password in passwords:
+                myList = list(map(str, password))
+                extendPassword = generate_hybrid_passwords(myList)
+                for newPass in extendPassword:
+                    for num in nums:
+                        myValidPassword.append(newPass + num)
+                        myValidPassword.append(num + newPass)
+            
+        for password in myValidPassword:
+            tested_file.write(password + '\n')
 
-    is_find = False
-    for length in range(1, max_length + 1):
-        if is_find == True:
-            break
-        for combination in itertools.product(chars, repeat=length):
-            if is_find == True:
-                break
-            str_pwd = "".join(combination)
-
-            try:
-                with ZipFile(Zzip) as zipObj:
-                    zipObj.extractall(pwd=bytes(str_pwd, 'utf-8'))
-                    end_time = time.time()
-                    time_taken = int((end_time - start_time) * 1000)
-                    data = get_data(1, "Cracking Successfully", f"Password found: {str_pwd}", f"Time taken: {time_taken} miliseconds")
-                    is_find = True
-            except RuntimeError as e:
-                continue
-
-    if not is_find:
-        data = get_data(0, '', '', '')
-
-start_cracking()
-with open('data.json', 'w') as json_file:
-    json.dump(data, json_file)
-
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+crack_passwords_with_hybrid_attack()
+tested_file.close()
