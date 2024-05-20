@@ -66,11 +66,11 @@ class PasswordCracker:
             # Tiến hành test password
             try:
                 with ZipFile(self.zip_file) as zipObj: 
-                    zipObj.extractall(pwd=bytes(password, 'utf-8'))
+                    zipObj.extractall(pwd=password.encode())
                     self.matched_password = password
                     break
-            except RuntimeError as e:
-                continue
+            except:
+                pass
 
     # Thuật toán Bruteforce Attack.
     def crack_passwords_with_brute_force(self, min_length, max_length, character_set): 
@@ -85,8 +85,8 @@ class PasswordCracker:
             tested_file.write('Cannot crack because take too much time\n')
             tested_file.write(f'Expected password have to test: {maximumGeneratePassword}\n')
             exit()
-
-        passwords = self.generate_passwords(min_length, max_length, character_set) # Sinh ra một list bao gôm các password thoả mãn yêu cầu được truyền vào
+        # Sinh ra một list bao gôm các password thoả mãn yêu cầu được truyền vào
+        passwords = self.generate_passwords(min_length, max_length, character_set) 
         self.cracking(passwords)     
 
     # Thuật toán cho dictionary attack.
