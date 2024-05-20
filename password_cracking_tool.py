@@ -60,7 +60,7 @@ class PasswordCracker:
         # Tính toán trước số lượng password sẽ phải sinh
         maximumGeneratePassword = 0
         for i in range(min_length, max_length+1):
-            maximumGeneratePassword += int(math.pow(len(character_set, i)))
+            maximumGeneratePassword += int(math.pow(len(character_set), i))
         # Dừng thuật toán khi thấy số lượng tìm kiếm quá lớn
         if maximumGeneratePassword > self.limit and self.limit != -1:
             tested_file.write('Cannot crack because take too much time\n')
@@ -69,6 +69,7 @@ class PasswordCracker:
 
         passwords = self.generate_passwords(min_length, max_length, character_set) # Sinh ra một list bao gôm các password thoả mãn yêu cầu được truyền vào
         self.cracking(passwords)     
+
     def crack_passwords_with_dictionary(self): # Thuật toán cho dictionary attack
         tested_file.write('Cracking with dictionary attack \n')
         with open(dictionary_file, 'r', encoding="latin-1") as dictionary: # Mo file dictionary len de lam viec
@@ -113,9 +114,6 @@ class PasswordCracker:
 def main():
     # Cài đặt môi trường và tiện ích cho tool.
     parser = argparse.ArgumentParser(description='Password cracking tool of Dang Nguyen - TWINHTER') # tool's description
-    # parser.add_argument('-b', '--brute-force', action='store_true', help='A brute force attack') # Brute force attack
-    # parser.add_argument('-hy', '--hybrid', action='store_true', help='A hybrid attack') # Hybrid attack
-    # parser.add_argument('-d', '--dictionary', action='store_true', help='A dictionary attack') # Dictionary attacK
     parser.add_argument('--algo',
                     default='da',
                     const='da',
