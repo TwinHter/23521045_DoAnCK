@@ -3,9 +3,12 @@ import itertools
 from zipfile import ZipFile
 import math
 
-dictionary_file = 'dictionary.txt' # Bộ password cho dictionary attack
-hybrid_file = 'hybrid.txt' # Bộ dữ liệu thô cho hybrid attack
-tested_file = open('tested_password.txt', 'w') # File chứa các password đã thử nghiệm và kết quả đưa ra
+# Bộ password cho dictionary attack.
+dictionary_file = 'dictionary.txt'
+# Bộ dữ liệu thô cho hybrid attack .
+hybrid_file = 'hybrid.txt' 
+# File chứa các password đã thử nghiệm và kết quả đưa ra.
+tested_file = open('tested_password.txt', 'w') 
 class PasswordCracker:
     def __init__(self, zip_file):
         self.matched_password = None # Password chính xác
@@ -14,35 +17,50 @@ class PasswordCracker:
         self.dict = {'a': '4', 'o': '0', 'e': '3', 'g': '9', 'z': '2', 'i': '1', 'A': '4', 'O': '0', 'E': '3', 'Z': '2', 'I': '1'} # Bộ ký tự thay thế dùng cho hybrid attack
         self.limit = 100000000 # Số lần thử password tối đa
 
-    def generate_passwords(self, min_length, max_length, character_set): # Sinh password cho bruteforce attack
-        passwords = [] # List để lưu những password khả thi
-        for length in range(min_length, max_length + 1): # Hàm để thực hiện sinh các tổ hợp thoả mãn min_length < password_length < max_length với bộ ký tự thuộc character_set
+    # Sinh password cho bruteforce attack.
+    def generate_passwords(self, min_length, max_length, character_set): 
+        # List để lưu những password khả thi
+        passwords = [] 
+        # Hàm để thực hiện sinh các tổ hợp thoả mãn min_length < password_length < max_length với bộ ký tự thuộc character_set
+        for length in range(min_length, max_length + 1): 
             for combination in itertools.product(character_set, repeat=length):
                 password = ''.join(combination)
                 passwords.append(password)
         return passwords
     
-    def generate_hybrid_passwords(self, myList, cur = 0): # Sinh password cho hybrid attack
-        if cur == len(myList): # Điều kiện dừng của đệ quy
+    # Sinh password cho hybrid attack.
+    def generate_hybrid_passwords(self, myList, cur = 0):  
+        # List trả về
+        res = []
+        # Điều kiện dừng của đệ quy
+        if cur == len(myList): 
             myPassword = ''.join(myList)
             # print(myList)
             res.append(myPassword)
             return res
 
-        res.extend(generate_hybrid_passwords(self, myList, cur+1)) # Không thay đổi ký tự hiện tại
+        # Không thay đổi ký tự hiện tại
+        res.extend(self.generate_hybrid_passwords(myList, cur+1)) 
+        
+        # Nếu ký tự hiện tại thuộc self.dict thì tiến hành thay đổi
         if myList[cur] in self.dict:
             tmp = myList[cur]
             myList[cur] = self.dict[tmp]
-            res.extend(generate_hybrid_passwords(self, myList, cur+1)) # Nếu ký tự hiện tại thuộc self.dict thì tiến hành thay đổi
+            res.extend(self.generate_hybrid_passwords(myList, cur+1)) 
             myList[cur] = tmp
 
+            # Trường hợp đặc biệt với ký tự 'a'
             if myList[cur] == 'a':
                 myList[cur] = '@'
-                res.extend(generate_hybrid_passwords(self, myList, cur+1)) # Trường hợp đặc biệt với ký tự 'a'
+                res.extend(self.generate_hybrid_passwords(myList, cur+1)) 
                 myList[cur] = 'a'
+        
+        return res
     
-    def cracking(self, myPassword): # Cracking với bộ password đã được sinh 
-        for password in myPassword: # Lấy từng xâu trong list để test
+    # Cracking với bộ password đã được sinh.
+    def cracking(self, myPassword): 
+        # Lấy từng xâu trong list để test 
+        for password in myPassword: 
             self.total_passwords += 1
             tested_file.write(password + '\n')
             # Tiến hành test password
@@ -54,7 +72,8 @@ class PasswordCracker:
             except RuntimeError as e:
                 continue
 
-    def crack_passwords_with_brute_force(self, min_length, max_length, character_set): # Thuật toán Bruteforce Attack
+    # Thuật toán Bruteforce Attack.
+    def crack_passwords_with_brute_force(self, min_length, max_length, character_set): 
         tested_file.write('Cracking with brute force attack \n')
         
         # Tính toán trước số lượng password sẽ phải sinh
@@ -70,17 +89,21 @@ class PasswordCracker:
         passwords = self.generate_passwords(min_length, max_length, character_set) # Sinh ra một list bao gôm các password thoả mãn yêu cầu được truyền vào
         self.cracking(passwords)     
 
-    def crack_passwords_with_dictionary(self): # Thuật toán cho dictionary attack
+    # Thuật toán cho dictionary attack.
+    def crack_passwords_with_dictionary(self): 
         tested_file.write('Cracking with dictionary attack \n')
-        with open(dictionary_file, 'r', encoding="latin-1") as dictionary: # Mo file dictionary len de lam viec
-            passwords = dictionary.read().splitlines() # Dua cac password tu file vao list passwords de xu ly
+        # Mở file dictionary để làm việc
+        with open(dictionary_file, 'r', encoding="latin-1") as dictionary: 
+            # Đưa các password từ file dictionary.txt vào list passwords và xử lý
+            passwords = dictionary.read().splitlines() 
             self.cracking(passwords)
 
-    def crack_passwords_with_hybrid_attack(self): # Thuật toán cho hybrid attack
+    # Thuật toán cho hybrid attack.
+    def crack_passwords_with_hybrid_attack(self): 
         tested_file.write('Cracking with hybrid attack \n')
-        # a, 4, @ / o, 0 / e, 3/ g, 9/ z 2/ i 1/ Một vài cặp ký tự có thể thay đổi cho nhau
-        # pass-num, num-pass Một vài dạng password có thể được cải tiến (num có length 0->3) 
-        nums = [] # List để chứa các tổ hợp của num
+        
+        # List để chứa các tổ hợp của nums .
+        nums = [] 
         for num_length in range(2):
             Lim = int(math.pow(10, num_length+1))
             for i in range(Lim):
@@ -90,20 +113,25 @@ class PasswordCracker:
         nums3 = ['', '000', '123', '321', '111', '222', '333', '444', '555', '666', '777', '888', '999', '987', '789', '1234', '123456', 'abc', 'xyz']
         nums.extend(nums3)
         
-        myValidPassword = [] # List chứa các password khả thi
+        # List chứa các password khả thi.
+        myValidPassword = [] 
         with open(hybrid_file, 'r', encoding="latin-1") as dictionary:
             passwords = dictionary.read().splitlines() 
             for password in passwords:
                 myList = list(map(str, password))
-                extendPassword = generate_hybrid_passwords(myList) # List chứa các dạng lai của pass đang xét
-                for newPass in extendPassword: # Tiến hành tạo các password dạng num + pass hay pass + num
+                # List chứa các dạng lai của pass đang xét.
+                extendPassword = self.generate_hybrid_passwords(myList)
+
+                # Tiến hành tạo các password dạng num + pass hay pass + num.
+                for newPass in extendPassword:
                     for num in nums:
                         myValidPassword.append(newPass + num)
                         myValidPassword.append(num + newPass)
             
         self.cracking(myValidPassword)
                         
-    def print_statistics(self): # Đưa ra kết luận cuối cùng
+    # Đưa ra kết luận cuối cùng.
+    def print_statistics(self): 
         tested_file.write(f"Total Number of Passwords Tried: {self.total_passwords}\n")
         if self.matched_password:
             tested_file.write(f"Password Cracked! Password: {self.matched_password}\n")
@@ -113,17 +141,24 @@ class PasswordCracker:
 
 def main():
     # Cài đặt môi trường và tiện ích cho tool.
-    parser = argparse.ArgumentParser(description='Password cracking tool of Dang Nguyen - TWINHTER') # tool's description
+
+    # Mô tả tool
+    parser = argparse.ArgumentParser(description='Password cracking tool of Dang Nguyen - TWINHTER')
+    # Chọn 1 trong 3 loại cracking gồm brute forces attack, dictionary attack và hybrid attack, default = dictionary attack.
     parser.add_argument('--algo',
                     default='da',
                     const='da',
                     nargs='?',
                     choices=['bfa', 'da', 'hb'],
-                    help='brute force attack, dictionary attack or hybrid attack') # Chọn 1 trong 3 loại cracking gồm brute forces attack, dictionary attack và hybrid attack, default = dictionary attack
-    parser.add_argument('-min', '--min-length', type=int, default=1, help='Minimum password length for brute force attack') #minimum length of password, default = 1
-    parser.add_argument('-max', '--max-length', type=int, default=6, help='Maximum password length for brute force attack') # maximum length of password, default = 6
+                    help='brute force attack, dictionary attack or hybrid attack') 
+    #minimum length of password
+    parser.add_argument('-min', '--min-length', type=int, default=1, help='Minimum password length for brute force attack') 
+    # maximum length of password
+    parser.add_argument('-max', '--max-length', type=int, default=6, help='Maximum password length for brute force attack') 
+
+    # Bộ ký tự cho bẻ khoá bruteforce - characterset
     parser.add_argument('-cset', '--character-set', default='abcdefghijklmnopqrstuvwxyz0123456789',
-                        help='Character set for brute force attack') # Bộ ký tự cho bẻ khoá bruteforce - characterset, default = chữ cái thường + chữ số
+                        help='Character set for brute force attack') 
     parser.add_argument('--zipfile', type=str, help = 'Zip file to crack') # Đường dẫn của zip file cần được bẻ khoá
 
     args = parser.parse_args()
