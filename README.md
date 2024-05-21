@@ -7,16 +7,11 @@
 python3 password_cracking_tool.py <content>
 ```
 ```
---algo ‘bfa’, ‘hb’, ‘da’
-Brute force attack, hybrid attack, dicitonary attack (default)
---zipfile Text
---min-length, Int
--min force attack)
-Đường dẫn đến file zip cần crack
-Default = 1, độ dài tối thiểu của mật khẩu (dùng cho brute
---max- Int length, -max --character- Text set, -cset
-Default = 6, độ dài tối đa của mật khẩu (dùng cho brute force attack)
-Default = ‘abcdefghijklmnopqrstuvwxyz0123456789’, chứa bộ ký tự của mật khẩu
+--algo ‘bfa’, ‘hb’, ‘da’ <Brute force attack, hybrid attack, dicitonary attack (default)>
+--zipfile Text <Path to zip file to crack>
+--min-length, min -> int  <Default = 1, minumum length of password for brute force attack>
+--max-lenth, -max -> int  <Default = 6, maximin length of password for brute force attack>
+--character-set, -cset -> text <Default = 'abcdefghijklmnopqrstuvwxyz0123456789, Character set for bruteforce attack>
 ```
 - After that, you can see the result in file tested_password.txt.
 - It may take 3 minutes for cracking.
