@@ -1,7 +1,11 @@
+test
+admin
 guest
 password
 a1b2c3
 Password1
+user
+master
 abc123
 qwerty
 baseball
@@ -14,7 +18,7 @@ monkey
 shadow
 g_czechout
 1q2w3e4r
-f**kyou
+fuckyou
 princess
 basketball
 sunshine
@@ -107,8 +111,6 @@ undefined
 Qwerty
 1qazxsw2
 Adam
-Test
-admin
 adminadmin
 ADMIN
 Menara
@@ -118,8 +120,6 @@ Abc@
 changeme
 student
 senha
-user
-master
 adminisp
 azerty
 P@55w0rd
